@@ -1,0 +1,170 @@
+/* Tiny-FTPd: a 2004 web app with a Windows 98 toolbar. Square, small, dense,
+   on an even grid: 4px gaps, 8px padding, 22px buttons, 23px rows. */
+
+:root {
+  --edge: #c3d9ff;   /* box and band borders */
+  --band: #e8eef7;   /* toolbar band */
+  --rule: #e8e8e8;   /* between rows */
+  --picked: #ffffcc; /* selected rows */
+  --focus: #5a7fc0;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  padding: 12px 16px 16px;
+  font: 13px Arial, Helvetica, sans-serif;
+  color: #000;
+  background: #fff;
+}
+a { color: #0000cc; }
+a:visited { color: #551a8b; }
+img { image-rendering: pixelated; }
+h1 { margin: 0 0 8px; font-size: 16px; }
+p { margin: 0 0 8px; }
+
+/* Only with JavaScript, or only without it. app.js sets .js before the
+   page draws, so neither flashes. */
+html:not(.js) .js-only, .js .no-js { display: none !important; }
+
+.top { display: flex; align-items: center; gap: 8px; min-height: 24px; margin-bottom: 12px; }
+.top img { display: block; }
+.crumbs { display: flex; flex-wrap: wrap; align-items: center; font-size: 16px; font-weight: bold; min-width: 0; }
+.crumbs a, .crumbs a:visited { color: #000; text-decoration: none; }
+.crumbs a:hover { text-decoration: underline; }
+.crumbs .sep { margin: 0 6px; color: #888; font-weight: normal; }
+.who { margin-left: auto; color: #555; font-size: 12px; white-space: nowrap; }
+.who b { color: #000; font-weight: normal; }
+
+.box { border: 1px solid var(--edge); }
+
+.band {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+  padding: 4px;
+  background: var(--band);
+  border-bottom: 1px solid var(--edge);
+}
+.group { display: flex; gap: 4px; }
+.group form { display: contents; }
+.views { display: flex; margin-left: auto; }
+.views .btn + .btn { margin-left: -1px; }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 22px;
+  padding: 0 8px;
+  border: 1px solid #8f8f8f;
+  border-radius: 0;
+  background: #f4f4f4;
+  color: #000;
+  font: 12px/14px Arial, Helvetica, sans-serif;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.btn, .btn:visited { color: #000; }
+.btn img { display: block; }
+.btn:hover:not(:disabled) { position: relative; background: #fff; border-color: var(--focus); }
+.btn:active:not(:disabled) { background: #dde6f5; }
+.btn.on { position: relative; background: #d4e0f4; border-color: var(--focus); cursor: default; }
+.btn:disabled { color: #9a9a9a; border-color: #c4c4c4; background: #f7f7f7; cursor: default; }
+.btn:disabled img { filter: grayscale(1); opacity: 0.4; }
+.btn:focus-visible { outline: 1px dotted #000; outline-offset: -4px; }
+
+/* Square Windows-style checkboxes with a pixel tick. */
+input[type="checkbox"] {
+  appearance: none;
+  display: block;
+  width: 13px;
+  height: 13px;
+  margin: 0;
+  border: 1px solid #555;
+  border-radius: 0;
+  background: #fff center no-repeat;
+  cursor: pointer;
+}
+input[type="checkbox"]:checked { background-image: url("/.tiny-ftpd/icons/check"); }
+input[type="checkbox"]:indeterminate { background-image: url("/.tiny-ftpd/icons/mixed"); }
+input[type="checkbox"]:focus-visible { outline: 1px dotted #000; outline-offset: 1px; }
+
+table.files { width: 100%; border-collapse: collapse; }
+.files th {
+  height: 24px;
+  padding: 0 8px;
+  border-bottom: 1px solid var(--edge);
+  color: #333;
+  font-size: 12px;
+  font-weight: normal;
+  text-align: left;
+  white-space: nowrap;
+}
+.files th a, .files th a:visited { color: #000; }
+.files td { height: 23px; padding: 0 8px; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+.files tbody tr:last-child td { border-bottom: 0; }
+.files tbody tr.selected td { background: var(--picked); }
+.files .check { width: 13px; padding-right: 0; }
+.files .name { width: 100%; max-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.files .name a { font-weight: bold; }
+.files .name img { margin-right: 6px; vertical-align: -3px; }
+.files .size { text-align: right; }
+.files .date { color: #444; }
+.files .empty td { height: 48px; color: #777; text-align: center; }
+
+.thumbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); gap: 8px; padding: 8px; }
+.thumbs a { display: block; padding: 4px; border: 1px solid #ddd; text-decoration: none; }
+.thumbs a, .thumbs a:visited { color: #000; }
+.thumbs a:hover { border-color: var(--focus); background: var(--picked); }
+.thumbs .pic { display: block; width: 100%; height: 108px; object-fit: contain; background: #f2f2f2; image-rendering: auto; }
+.thumbs .icon { display: block; margin: 38px auto; }
+.thumbs span { display: block; padding-top: 4px; overflow: hidden; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+.thumbs small { color: #666; }
+.empty { padding: 16px 8px; color: #777; text-align: center; }
+
+.summary { margin: 8px 0 0; color: #555; font-size: 12px; }
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 22px;
+  margin: 0 0 8px;
+  padding: 0 8px;
+  background: #fff1a8;
+  font-size: 12px;
+}
+.status[hidden] { display: none; }
+.status.error { background: #ffe4e4; color: #900; }
+.meter { width: 160px; height: 10px; border: 1px solid #888; background: #fff; }
+.meter[hidden] { display: none; }
+.meter i { display: block; width: 0; height: 100%; background: #6a9ae6; }
+
+.ask { max-width: 520px; padding: 12px; }
+.ask ul { margin: 0 0 8px; padding-left: 20px; }
+.ask input:not([type]) { width: 280px; max-width: 100%; height: 22px; padding: 0 4px; border: 1px solid #7f9db9; font: inherit; }
+.ask .buttons { display: flex; align-items: center; gap: 12px; margin: 12px 0 0; }
+
+/* Shown over the page while files are dragged onto it. */
+body.dropping::after {
+  content: "Drop to upload here";
+  position: fixed;
+  inset: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed var(--focus);
+  background: rgba(255, 255, 204, 0.94);
+  font-size: 16px;
+  font-weight: bold;
+  pointer-events: none;
+}
+
+@media (max-width: 640px) {
+  body { padding: 8px; }
+  .files .date { display: none; }
+  .views { margin-left: 0; }
+}

@@ -1,0 +1,9 @@
+# Build output
+/dist/
+/tinyftpd
+/tinyftpd.exe
+
+# Local config and self-signed certificates, which hold password hashes and a private key
+tinyftpd.json
+tinyftpd-cert.pem
+tinyftpd-key.pem

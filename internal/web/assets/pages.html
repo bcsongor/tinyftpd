@@ -1,0 +1,122 @@
+{{define "top"}}<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{.Title}}</title>
+<link rel="icon" href="/.tiny-ftpd/icons/app">
+<link rel="stylesheet" href="/.tiny-ftpd/static/style.css?v={{version}}">
+<script src="/.tiny-ftpd/static/app.js?v={{version}}"></script>
+</head>
+<body>
+<header class="top">
+<img src="/.tiny-ftpd/icons/app" alt="" width="16" height="16">
+<nav class="crumbs">
+{{- range $i, $c := .Crumbs}}{{if $i}}<span class="sep">/</span>{{end}}<a href="{{$c.Href}}">{{$c.Name}}</a>{{end -}}
+</nav>
+{{- if .User}}<span class="who"><b>{{.User}}</b>{{if .Free}} &middot; {{.Free}}{{end}}</span>{{end}}
+</header>
+{{end}}
+
+{{define "bottom"}}</body>
+</html>
+{{end}}
+
+{{define "listing"}}{{template "top" .}}
+<div id="status" class="status" role="status" hidden><span class="text"></span><span class="meter" hidden><i></i></span><span class="pct"></span></div>
+<div class="box">
+<div class="band">
+{{- if .Writable}}
+<div class="group">
+<form id="upload" method="post" action="{{.Action}}upload" enctype="multipart/form-data">
+<button type="button" class="btn js-only" data-pick><img src="/.tiny-ftpd/icons/upload" alt="" width="16" height="16">Upload&hellip;</button>
+<span class="no-js"><input type="file" name="file" multiple required> <button class="btn"><img src="/.tiny-ftpd/icons/upload" alt="" width="16" height="16">Upload</button></span>
+</form>
+<button class="btn" form="items" formaction="{{.Action}}mkdir" data-action="mkdir"><img src="/.tiny-ftpd/icons/newfolder" alt="" width="16" height="16">New folder&hellip;</button>
+</div>
+{{- if not .Thumbs}}
+<div class="group">
+<button class="btn" form="items" formaction="{{.Action}}download" data-action="download"><img src="/.tiny-ftpd/icons/download" alt="" width="16" height="16">Download</button>
+<button class="btn" form="items" formaction="{{.Action}}rename" data-action="rename"><img src="/.tiny-ftpd/icons/rename" alt="" width="16" height="16">Rename</button>
+<button class="btn" form="items" formaction="{{.Action}}delete" data-action="delete"><img src="/.tiny-ftpd/icons/delete" alt="" width="16" height="16"><span class="label">Delete</span></button>
+</div>
+{{- end}}
+{{- end}}
+<div class="views">
+<a class="btn{{if not .Thumbs}} on{{end}}" href="{{.ListHref}}"{{if not .Thumbs}} aria-current="page"{{end}}><img src="/.tiny-ftpd/icons/list" alt="" width="16" height="16">List</a>
+<a class="btn{{if .Thumbs}} on{{end}}" href="{{.ThumbsHref}}"{{if .Thumbs}} aria-current="page"{{end}}><img src="/.tiny-ftpd/icons/thumbs" alt="" width="16" height="16">Thumbnails</a>
+</div>
+</div>
+<form id="items" method="post">
+{{- if .Thumbs}}
+<div class="thumbs">
+{{- if .Parent}}
+<a href="{{.Parent}}"><img class="icon" src="/.tiny-ftpd/icons/up" alt="" width="32" height="32"><span>..</span></a>
+{{- end}}
+{{- range .Entries}}
+<a href="{{.Href}}" title="{{.Name}}">{{if eq .Kind "image"}}<img class="pic" src="{{.Href}}" alt="" loading="lazy">{{else}}<img class="icon" src="/.tiny-ftpd/icons/{{.Kind}}" alt="" width="32" height="32">{{end}}<span><b>{{.Name}}</b>{{if .Size}} <small>{{.Size}}</small>{{end}}</span></a>
+{{- end}}
+</div>
+{{- if not .Entries}}<p class="empty">This folder is empty.{{if .Writable}} Drop files here or use Upload.{{end}}</p>{{end}}
+{{- else}}
+<table class="files">
+<thead><tr>
+{{- if .Writable}}<th class="check"><input type="checkbox" id="all" class="js-only" aria-label="Select all"></th>{{end}}
+{{- range .Columns}}
+<th{{with .Class}} class="{{.}}"{{end}}><a href="{{.Href}}">{{.Label}}</a>{{.Arrow}}</th>
+{{- end}}
+</tr></thead>
+<tbody>
+{{- if .Parent}}
+<tr>{{if .Writable}}<td class="check"></td>{{end}}<td class="name"><img src="/.tiny-ftpd/icons/up" alt="" width="16" height="16"><a href="{{.Parent}}">..</a></td><td class="size"></td><td class="date"></td></tr>
+{{- end}}
+{{- range .Entries}}
+<tr>{{if $.Writable}}<td class="check"><input type="checkbox" name="name" value="{{.Name}}" aria-label="Select {{.Name}}"{{if not .Dir}} data-file{{end}}></td>{{end}}<td class="name" title="{{.Name}}"><img src="/.tiny-ftpd/icons/{{.Kind}}" alt="" width="16" height="16"><a href="{{.Href}}">{{.Name}}</a></td><td class="size">{{.Size}}</td><td class="date">{{.Date}}</td></tr>
+{{- else}}
+<tr class="empty"><td colspan="4">This folder is empty.{{if .Writable}} Drop files here or use Upload.{{end}}</td></tr>
+{{- end}}
+</tbody>
+</table>
+{{- end}}
+</form>
+</div>
+<p class="summary">{{.Summary}}<span id="selected"></span></p>
+{{template "bottom"}}{{end}}
+
+{{define "delete"}}{{template "top" .}}
+<form class="ask box" method="post" action="{{.Action}}">
+<h1>Delete {{if eq (len .Names) 1}}{{index .Names 0}}{{else}}{{len .Names}} items{{end}}?</h1>
+{{- if gt (len .Names) 1}}
+<ul>{{range .Names}}<li>{{.}}</li>{{end}}</ul>
+{{- end}}
+<p>They'll be gone from {{.Path}} for good. Folders have to be empty.</p>
+{{- range .Names}}<input type="hidden" name="name" value="{{.}}">{{end}}
+<input type="hidden" name="confirm" value="1">
+<p class="buttons"><button class="btn"><img src="/.tiny-ftpd/icons/delete" alt="" width="16" height="16">Delete</button> <a href="{{.Back}}">Cancel</a></p>
+</form>
+{{template "bottom"}}{{end}}
+
+{{define "rename"}}{{template "top" .}}
+<form class="ask box" method="post" action="{{.Action}}">
+<h1>Rename {{index .Names 0}}</h1>
+<input type="hidden" name="name" value="{{index .Names 0}}">
+<p><label>New name <input name="to" value="{{index .Names 0}}" required autofocus></label></p>
+<p class="buttons"><button class="btn"><img src="/.tiny-ftpd/icons/rename" alt="" width="16" height="16">Rename</button> <a href="{{.Back}}">Cancel</a></p>
+</form>
+{{template "bottom"}}{{end}}
+
+{{define "mkdir"}}{{template "top" .}}
+<form class="ask box" method="post" action="{{.Action}}">
+<h1>New folder in {{.Path}}</h1>
+<p><label>Name <input name="folder" required autofocus></label></p>
+<p class="buttons"><button class="btn"><img src="/.tiny-ftpd/icons/newfolder" alt="" width="16" height="16">Create</button> <a href="{{.Back}}">Cancel</a></p>
+</form>
+{{template "bottom"}}{{end}}
+
+{{define "message"}}{{template "top" .}}
+<div class="ask box">
+<h1>{{.Heading}}</h1>
+<p>{{.Text}}</p>
+{{if .Back}}<p><a href="{{.Back}}">Back to the folder</a></p>{{end}}
+</div>
+{{template "bottom"}}{{end}}
